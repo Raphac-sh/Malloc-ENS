@@ -9,6 +9,5 @@ int main(void) {
     test_4();
     test_perf();
 
-    print_mem();
     return 0;
 }

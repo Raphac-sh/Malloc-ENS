@@ -69,7 +69,6 @@ void test_4(void) {
     char *ptr = (char *)myalloc(10);
     Bloc *ptr_block = (Bloc *)(ptr - sizeof(Bloc *));
 
-    print_mem();
     printf("test_4 : affichage de la mémoire avant free : \n");
     print_mem();
 
@@ -80,6 +79,8 @@ void test_4(void) {
 
     if(ptr_block->head == NULL) printf("test_4 : erreur, le bloc libéré n'est pas vide\n");
     else printf("test_4 : validé, free libère bien les blocs\n");
+
+    printf("(Le bloc alloué est le dernier car on a libéré les blocs dans l'ordre croissant, ce qui est cohérent avec la structure de liste chainée \n");
     printf("\n"); 
 }
 
@@ -88,7 +89,7 @@ void test_perf(void) {
 
     int i;
     clock_t time1, time2;
-    float diff;
+    float diff1, diff2;
     void *ptr_tab[MAX_SMALL];
 
     time1 = clock();
@@ -99,8 +100,8 @@ void test_perf(void) {
 
     time2 = clock();
 
-    diff = ((float)(time2 - time1) / 1000000.0F ) * 1000;
-    printf("Allocations myalloc : %f ms\n", diff);
+    diff1 = ((float)(time2 - time1) / 1000000.0F ) * 1000;
+    printf("Allocations myalloc : %f ms\n", diff1);
 
     time1 = clock();
 
@@ -110,10 +111,12 @@ void test_perf(void) {
 
     time2 = clock();
 
-    diff = ((float)(time2 - time1) / 1000000.0F ) * 1000;
-    printf("Allocations malloc : %f ms\n", diff);
+    diff2 = ((float)(time2 - time1) / 1000000.0F ) * 1000;
+    printf("Allocations malloc : %f ms\n", diff2);
 
     for(i=0; i<MAX_SMALL; i++) {
         free(ptr_tab[i]);
     }
+    
+    printf("Notre version est %.1f fois plus rapide !", diff2/diff1);
 }
