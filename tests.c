@@ -95,7 +95,15 @@ void test_perf(void) {
     time1 = clock();
 
     for(i=0; i<MAX_SMALL; i++) {
-        myalloc(SIZE_BLK_SMALL);
+        ptr_tab[i] = myalloc(SIZE_BLK_SMALL);
+    }
+
+    for(i=0; i<MAX_SMALL; i++) {
+        myfree(ptr_tab[i]);
+    }
+
+    for(i=0;i<1000; i++) {
+        myfree(myalloc(SIZE_BLK_SMALL));
     }
 
     time2 = clock();
@@ -109,14 +117,18 @@ void test_perf(void) {
         ptr_tab[i] = malloc(SIZE_BLK_SMALL);
     }
 
+    for(i=0; i<MAX_SMALL; i++) {
+        free(ptr_tab[i]);
+    }
+
+    for(i=0;i<1000; i++) {
+        free(malloc(SIZE_BLK_SMALL));
+    }
+
     time2 = clock();
 
     diff2 = ((float)(time2 - time1) / 1000000.0F ) * 1000;
     printf("Allocations malloc : %f ms\n", diff2);
-
-    for(i=0; i<MAX_SMALL; i++) {
-        free(ptr_tab[i]);
-    }
     
     printf("Notre version est %.1f fois plus rapide !", diff2/diff1);
 }
