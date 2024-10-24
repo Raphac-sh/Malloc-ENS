@@ -27,7 +27,10 @@ static BigBloc *big_free;
 static Bloc *small_free;
 
 void *myalloc(size_t);
+void *myalloc_big(size_t);
 void myfree(void *);    
-void *realloc(void *, size_t);
+void myfree_big(void *);    
+void *my_realloc(void *, size_t);
+void *realloc_big(void *, size_t);
 
 void print_mem(void);

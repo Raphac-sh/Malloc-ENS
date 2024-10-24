@@ -1,4 +1,5 @@
 #include "myalloc.h"
+#include <unistd.h>
 
 static bool new_mem = true; 
 
@@ -24,7 +25,7 @@ void *myalloc_big(size_t size) {
 
         temp = sbrk(size + h + sizeof(size_t) - (size + h)%sizeof(size_t));
         temp->bloc_size = size + h + sizeof(size_t) - (size+h)%sizeof(size_t);
-        temp->body = (char *)big_free + h; 
+        temp->body = (char *)temp + h; 
     } else {
         if(it->bloc_size < size + h + SIZE_BLK_SMALL) {
             /* Taille proche de celle demandée */
@@ -36,7 +37,6 @@ void *myalloc_big(size_t size) {
                     /* Un seul bloc libre */
 
                     temp = it;
-                    temp->head = NULL;
                 } else {
                     /* On fait pointer big_free sur le suivant */
 
@@ -58,22 +58,26 @@ void *myalloc_big(size_t size) {
             }
         } else {
             /* On divise le bloc en deux */
+            printf("Divise \n");
 
-            temp = it + it->bloc_size - size - h;
-            temp->head = it->head;
+            temp = (BigBloc *) ((char *)it + it->bloc_size - (size + h + sizeof(size_t) - (size + h)%sizeof(size_t)));
             temp->bloc_size = size+h;
             temp->body = (char *)temp + h;
 
-            it->head = temp->head;
             it->bloc_size -= (size + h);
         }
     }
-    temp->head = NULL;
+
+    temp->head = (BigBloc *) (1); /* Bloc alloué : bit de poid faible à 1 */
+
+    printf("Block : %p\n", temp);
+    printf("head : %p\n", temp->head);
+    printf("size : %lu\n", temp->bloc_size);
 
     return temp->body;
 }
 
-void *myalloc_small(size_t size) {
+void *myalloc_small(void) {
     /* Alloue un bloc de mémoire de taille size et renvoie un pointeur sur 
      * le bloc correspondant */
 
@@ -118,7 +122,7 @@ void *myalloc(size_t size) {
     if(size < SIZE_BLK_SMALL) {
         /* Petit bloc */
         
-        return myalloc_small(size);
+        return myalloc_small();
     } else {
         /* Gros bloc */
 
@@ -146,11 +150,19 @@ void myfree_big(void *ptr) {
     BigBloc *ptr_block = (BigBloc *)((char *) ptr - h);
     BigBloc *temp; 
 
-    if(ptr_block->head != NULL) return; /* Bloc déjà libre */
+    printf("ptr_block : %p\n", ptr_block);
+    printf("head : %p\n", ptr_block->head);
+
+    if(((size_t) ptr_block->head & 1) == 0) return; /* Bloc déjà libre */
+
+    printf("big_free: %p\n", big_free);
 
     temp = big_free;
     big_free = ptr_block;
     big_free->head = temp;
+    printf("new big_free: %p\n", big_free);
+    printf("big_free head: %p\n", big_free->head);
+
 }
 
 void myfree(void *ptr) {
@@ -172,7 +184,9 @@ void myfree(void *ptr) {
 void copy(BigBloc *old_bloc, BigBloc *new_bloc) {
     char *old_body = old_bloc->body;
     char *new_body = new_bloc->body;
-    int i;
+    size_t i;
+
+    printf("copy : %p, %p\n", old_bloc, new_bloc);
 
     for(i = 0; i<old_bloc->bloc_size; i++) {
         new_body[i] = old_body[i];
@@ -184,7 +198,7 @@ void *realloc_big(void *ptr, size_t size) {
     BigBloc *new_bloc; 
     BigBloc *temp;
 
-    if(ptr_block->head != NULL) return NULL; /* Bloc libre */
+    if(((size_t) ptr_block->head & 1) == 0) return NULL;
 
     if(size + h + SIZE_BLK_SMALL < ptr_block->bloc_size) {
         /* Assez petit : on coupe en deux */
@@ -201,7 +215,7 @@ void *realloc_big(void *ptr, size_t size) {
         big_free = ptr_block;
         big_free->head = temp;
 
-        return new_bloc;
+        return new_bloc->body;
     } else if (size - h< ptr_block->bloc_size){
         /* On diminue simplement la taille, on ne réalloue pas dans small_tab (trop couteux) */
 
@@ -209,16 +223,18 @@ void *realloc_big(void *ptr, size_t size) {
         return ptr_block; 
     } else {
         /* Redimensionnement à une taille plus grande avec un malloc-copy-free */
+        printf("Redimensionnement\n");
 
-        new_bloc = myalloc(size);
+        new_bloc = (BigBloc *) ((char *) myalloc(size) - h);
         copy(ptr_block, new_bloc);
-        free(ptr_block);
+        myfree(ptr);
 
-        return new_bloc;
+
+        return new_bloc->body;
     }
 }
 
-void *realloc(void *ptr, size_t size) {
+void *my_realloc(void *ptr, size_t size) {
     /* Réalloue le bloc associé à l'adresse pointée par ptr, pour qui'l ait une
      * taille de size */
 
@@ -228,6 +244,7 @@ void *realloc(void *ptr, size_t size) {
 
     if( from_origin < 0 || (from_origin) % gap != 0 || from_origin > gap*MAX_SMALL) {
         /* Gros bloc */
+
         return realloc_big(ptr, size);
     }
     else {
