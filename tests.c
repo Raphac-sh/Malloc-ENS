@@ -162,5 +162,5 @@ void test_perf(void) {
     diff2 = ((float)(time2 - time1) / 1000000.0F ) * 1000;
     printf("Allocations malloc : %f ms\n", diff2);
     
-    printf("Notre version est %.1f fois plus rapide !", diff2/diff1);
+    printf("Notre version est %.1f fois plus lente... \n", diff1/diff2);
 }

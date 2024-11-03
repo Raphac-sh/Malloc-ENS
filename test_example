@@ -2,60 +2,67 @@
 On alloue et on libère un bloc de taille 5000 :
 Bloc libre 0 : 5024
 On alloue un bloc de taille 3000 :
-Bloc libre 0 : 2000
+Bloc libre 0 : 2008
 test_1 : Validé, On a bien divisé le bloc libre
 ----- TEST_2 -----
 On alloue et on libère un bloc de taille 5000 :
 Bloc libre 0 : 5024
 Bloc libre 1 : 3024
-Bloc libre 2 : 2000
+Bloc libre 2 : 2008
 On alloue un bloc de taille 4950 :
 Bloc libre 0 : 3024
-Bloc libre 1 : 2000
+Bloc libre 1 : 2008
 test_2 : Validé, On a bien réalloué le bloc précédemment libéré
 ----- TEST_3 -----
 Bloc libre 0 : 3024
-Bloc libre 1 : 2000
+Bloc libre 1 : 2008
 Première libération :
 Bloc libre 0 : 5024
 Bloc libre 1 : 3024
-Bloc libre 2 : 2000
+Bloc libre 2 : 2008
 Deuxième libération :
 Bloc libre 0 : 5024
 Bloc libre 1 : 3024
-Bloc libre 2 : 2000
+Bloc libre 2 : 2008
 test_3 : Validé, on ne peut pas libérer un bloc libre
 ----- TEST_4 -----
 On réalloue un bloc de taille 500 à une taille plus grande :
-Bloc libre 0 : 520
-Bloc libre 1 : 3784
-Bloc libre 2 : 3024
-Bloc libre 3 : 2000
+Bloc libre 0 : 5024
+Bloc libre 1 : 3024
+Bloc libre 2 : 2008
 On libère le bloc réalloué :
-Bloc libre 0 : 720
-Bloc libre 1 : 520
-Bloc libre 2 : 3784
-Bloc libre 3 : 3024
-Bloc libre 4 : 2000
+Bloc libre 0 : 7024
+Bloc libre 1 : 5024
+Bloc libre 2 : 3024
+Bloc libre 3 : 2008
 test_4 : Validé, la réallocation d'un bloc de taille fonctionne comme attendu
 ----- TEST_5 -----
-Bloc libre 0 : 200
-Bloc libre 1 : 520
-Bloc libre 2 : 3784
+Bloc libre 0 : 2008
+Bloc libre 1 : 5024
+Bloc libre 2 : 3024
+Bloc libre 3 : 2008
+5024
+2008
+Bloc libre 0 : 2008
+Bloc libre 1 : 2008
+Bloc libre 2 : 5024
 Bloc libre 3 : 3024
-Bloc libre 4 : 2000
+Bloc libre 4 : 2008
 On réalloue un bloc de taille 500 à une taille plus petite, le bloc est divisé :
-Bloc libre 0 : 200
-Bloc libre 1 : 200
-Bloc libre 2 : 520
-Bloc libre 3 : 3784
-Bloc libre 4 : 3024
-Bloc libre 5 : 2000
+Bloc libre 0 : 2008
+Bloc libre 1 : 2008
+Bloc libre 2 : 5024
+Bloc libre 3 : 3024
+Bloc libre 4 : 2008
 Après libération :
-Bloc libre 0 : 320
-Bloc libre 1 : 200
-Bloc libre 2 : 200
-Bloc libre 3 : 520
-Bloc libre 4 : 3784
-Bloc libre 5 : 3024
-Bloc libre 6 : 2000
+Bloc libre 0 : 3024
+Bloc libre 1 : 2008
+Bloc libre 2 : 2008
+Bloc libre 3 : 5024
+Bloc libre 4 : 3024
+Bloc libre 5 : 2008
+Allocations myalloc : 0.967000 ms
+Allocations malloc : 0.532000 ms
+Notre version est 0.6 fois plus rapide !----- TEST_EXT_1 -----
+test_ext_1 : validé, on augmente le nombre de petits blocs lorsque la mémoire est pleine
+

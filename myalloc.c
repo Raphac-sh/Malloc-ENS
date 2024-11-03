@@ -207,18 +207,16 @@ void *realloc_big(void *ptr, size_t size) {
 
     if(size + h + SIZE_BLK_SMALL < ptr_block->bloc_size) {
         /* Assez petit : on coupe en deux */
+
         new_bloc = (BigBloc *) ((char *)ptr_block + ptr_block->bloc_size - (size + h + sizeof(size_t) - (size + h)%sizeof(size_t)));
         new_bloc->head = ptr_block->head;
         new_bloc->bloc_size = size + h + sizeof(size_t) - (size + h)%sizeof(size_t);
 
-        printf("%lu\n",ptr_block->bloc_size); 
         ptr_block->bloc_size -= size + h + (size + h)%sizeof(size_t);
-        printf("%lu\n",ptr_block->bloc_size); 
 
         /* On ajoute le nouveau bloc aux blocs libres */
         ptr_block->head = big_free;
         big_free = ptr_block;
-        print_big_free();
 
         return (char *)new_bloc + h;
     } else if (size - h < ptr_block->bloc_size){
