@@ -2,86 +2,118 @@
 #include "myalloc.h"
 
 void test_1(void) {
-    /* Vérifie que myalloc alloue bien des blocs initialement libres */
+    /* Vérifie que l'on utilise bien une division de bloc lorsque c'est possible */
+    void *ptr;
+    printf("----- TEST_1 -----\n");
 
-    char *ptr;
-    char *prev_free = ptr_free->body;
-    Bloc *prev_head = ptr_free->head;
+    myfree(myalloc(5000));
+    printf("On alloue et on libère un bloc de taille 5000 :\n");
+    print_big_free();
 
-    printf("test_1 : affichage de la mémoire avant allocation : \n");
-    print_mem();
-
-    ptr = (char *)myalloc(10);
-
-    printf("test_1 : affichage de la mémoire après allocation : \n");
-    print_mem();
-
-
-    if(ptr == prev_free && prev_head != NULL) printf("test_1 : erreur, le bloc alloué n'était pas initialement libre\n");
-    else printf("test_1 : validé, myalloc alloue un bloc initialement libre\n");
-    printf("\n"); 
+    ptr = myalloc(3000);
+    printf("On alloue un bloc de taille 3000 :\n");
+    print_big_free();
+    printf("test_1 : Validé, On a bien divisé le bloc libre\n");
 
     myfree(ptr);
 }
 
 void test_2(void) {
-    /* Vérifie que myalloc renvoie un pointeur NULL quand la mémoire est pleine */
+    /* Réutilisation d'un bloc de taille proche */
+    void *ptr;
+    printf("----- TEST_2 -----\n");
 
+    myfree(myalloc(5000));
+    printf("On alloue et on libère un bloc de taille 5000 :\n");
+    print_big_free();
+
+    ptr = myalloc(4950);
+    printf("On alloue un bloc de taille 4950 :\n");
+    print_big_free();
+    printf("test_2 : Validé, On a bien réalloué le bloc précédemment libéré\n");
+    myfree(ptr);
+}
+
+void test_3(void) {
+    /* Un bloc libre n'est pas libéré */
+    void *ptr = myalloc(5000);
+    printf("----- TEST_3 -----\n");
+
+    print_big_free();
+    myfree(ptr);
+    printf("Première libération :\n");
+    print_big_free();
+    myfree(ptr);
+    printf("Deuxième libération :\n");
+    print_big_free();
+    printf("test_3 : Validé, on ne peut pas libérer un bloc libre\n");
+}
+
+void test_4(void) {
+    /* Realloc d'une taille plus grande */
+
+    void *ptr = myalloc(5000);
+    int i = 0;
+    bool test_copy = true;
+
+    for(i = 0; i<5000; i++) {
+        ((char *) ptr)[i] = 'a';
+    }
+
+    printf("----- TEST_4 -----\n");
+
+    ptr = my_realloc(ptr, 7000);
+    printf("On réalloue un bloc de taille 500 à une taille plus grande :\n");
+    print_big_free();
+
+    for(i = 0; i<5000; i++) {
+        if (((char *) ptr)[i] != 'a') test_copy = false;
+    }
+
+    myfree(ptr);
+    printf("On libère le bloc réalloué :\n");
+    print_big_free();
+
+    if(test_copy) printf("test_4 : Validé, la réallocation d'un bloc de taille fonctionne comme attendu\n");
+    else printf("test_4 : Erreur, le contenu du bloc n'est pas bien copié\n");
+}
+
+void test_5(void) {
+    void *ptr = myalloc(5000);
+    printf("----- TEST_5 -----\n");
+
+    print_big_free();
+    ptr = my_realloc(ptr, 3000);
+    printf("On réalloue un bloc de taille 500 à une taille plus petite, le bloc est divisé :\n");
+    print_big_free();
+    myfree(ptr);
+    printf("Après libération :\n");
+    print_big_free();
+}
+
+void test_ext_1(void) {
+    /* Vérifie que myalloc permet d'allouer plus de petits blocs */
+
+    printf("----- TEST_EXT_1 -----\n");
     int i;
     void *ptr_tab[MAX_SMALL];
+    void *ptr;
 
     for(i=0; i<MAX_SMALL; i++) {
         ptr_tab[i] = myalloc(10);
     }
-    printf("test_2 : affichage de la mémoire : \n");
-    print_mem();
 
-    if (myalloc(10) != NULL) {
-        printf("test_2 : erreur, on alloue alors que la mémoire est pleine");
+    if ((ptr = myalloc(10)) != NULL) {
+        printf("test_ext_1 : validé, on augmente le nombre de petits blocs lorsque la mémoire est pleine\n");
     } else {
-        printf("test_2 : validé, myalloc renvoie NULL quand la mémoire est pleine\n");
+        printf("test_2 : erreur, myalloc renvoie NULL quand la mémoire est pleine\n");
     }
     printf("\n");
 
     for(i=0; i<MAX_SMALL; i++) {
         myfree(ptr_tab[i]);
     }
-}
-
-
-void test_3(void) {
-    /* Vérifie que myalloc n'alloue pas de mémoire quand size est supérieure à
-     * la taille maximale */
-    
-    void *ptr = myalloc(SIZE_BLK_SMALL+1);
-
-    if (ptr != NULL) {
-        printf("test_3 : erreur, on alloue plus que la capacité maximale");
-    } else {
-        printf("test_3 : validé, on ne peut pas allouer plus que la taille maximale\n");
-    }
-    printf("\n");
-}
-
-void test_4(void) {
-    /* Vérifie que myfree libère bien les blocs */
-
-    char *ptr = (char *)myalloc(10);
-    Bloc *ptr_block = (Bloc *)(ptr - sizeof(Bloc *));
-
-    printf("test_4 : affichage de la mémoire avant free : \n");
-    print_mem();
-
     myfree(ptr);
-
-    printf("test_4 : affichage de la mémoire après free : \n");
-    print_mem();
-
-    if(ptr_block->head == NULL) printf("test_4 : erreur, le bloc libéré n'est pas vide\n");
-    else printf("test_4 : validé, free libère bien les blocs\n");
-
-    printf("(Le bloc alloué est le dernier car on a libéré les blocs dans l'ordre croissant, ce qui est cohérent avec la structure de liste chainée \n");
-    printf("\n"); 
 }
 
 void test_perf(void) {
@@ -95,15 +127,15 @@ void test_perf(void) {
     time1 = clock();
 
     for(i=0; i<MAX_SMALL; i++) {
-        ptr_tab[i] = myalloc(SIZE_BLK_SMALL);
+        ptr_tab[i] = myalloc(500);
     }
 
     for(i=0; i<MAX_SMALL; i++) {
         myfree(ptr_tab[i]);
     }
 
-    for(i=0;i<1000; i++) {
-        myfree(myalloc(SIZE_BLK_SMALL));
+    for(i=0;i<MAX_SMALL; i++) {
+        myfree(myalloc(500));
     }
 
     time2 = clock();
@@ -114,15 +146,15 @@ void test_perf(void) {
     time1 = clock();
 
     for(i=0; i<MAX_SMALL; i++) {
-        ptr_tab[i] = malloc(SIZE_BLK_SMALL);
+        ptr_tab[i] = malloc(500);
     }
 
     for(i=0; i<MAX_SMALL; i++) {
         free(ptr_tab[i]);
     }
 
-    for(i=0;i<1000; i++) {
-        free(malloc(SIZE_BLK_SMALL));
+    for(i=0;i<MAX_SMALL; i++) {
+        free(malloc(500));
     }
 
     time2 = clock();

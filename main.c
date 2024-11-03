@@ -1,8 +1,11 @@
 #include "project.h"
 
 int main(void) {
-    void *ptr = myalloc(2000);
-    ptr = my_realloc(ptr, 3000);
+    test_1();
+    test_2();
+    test_3();
+    test_4();
+    test_5();
 
     return 0;
 }
