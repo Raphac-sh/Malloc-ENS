@@ -1,5 +1,4 @@
 #include "tests.h"
-#include "myalloc.h"
 
 void test_1(void) {
     /* Vérifie que l'on utilise bien une division de bloc lorsque c'est possible */
@@ -61,9 +60,10 @@ void test_4(void) {
     }
 
     printf("----- TEST_4 -----\n");
+    print_big_free();
 
     ptr = my_realloc(ptr, 7000);
-    printf("On réalloue un bloc de taille 500 à une taille plus grande :\n");
+    printf("On réalloue un bloc de taille 5000 à une taille plus grande :\n");
     print_big_free();
 
     for(i = 0; i<5000; i++) {
@@ -84,20 +84,23 @@ void test_5(void) {
 
     print_big_free();
     ptr = my_realloc(ptr, 3000);
-    printf("On réalloue un bloc de taille 500 à une taille plus petite, le bloc est divisé :\n");
+    printf("On réalloue un bloc de taille 5000 à une taille plus petite, le bloc est divisé :\n");
     print_big_free();
     myfree(ptr);
     printf("Après libération :\n");
     print_big_free();
+
+    printf("test_3 : Validé, on a bien divisé le bloc lors d'une réallocation à une taille inférieure \n");
 }
 
 void test_ext_1(void) {
     /* Vérifie que myalloc permet d'allouer plus de petits blocs */
 
-    printf("----- TEST_EXT_1 -----\n");
     int i;
     void *ptr_tab[MAX_SMALL];
     void *ptr;
+
+    printf("----- TEST_EXT_1 -----\n");
 
     for(i=0; i<MAX_SMALL; i++) {
         ptr_tab[i] = myalloc(10);
@@ -106,7 +109,7 @@ void test_ext_1(void) {
     if ((ptr = myalloc(10)) != NULL) {
         printf("test_ext_1 : validé, on augmente le nombre de petits blocs lorsque la mémoire est pleine\n");
     } else {
-        printf("test_2 : erreur, myalloc renvoie NULL quand la mémoire est pleine\n");
+        printf("test_ext_1 : erreur, myalloc renvoie NULL quand la mémoire est pleine\n");
     }
     printf("\n");
 
@@ -116,6 +119,15 @@ void test_ext_1(void) {
     myfree(ptr);
 }
 
+void test_ext_2(void) {
+    printf("----- TEST_EXT_2 -----\n");
+    print_big_free();
+    printf("On alloue un bloc de taille 1000, que l'on libère\n");
+    myfree(myalloc(1000));
+    print_big_free();
+    printf("test_ext_2 : validé, on fusionne bien les blocs adjacents : le bloc est divisé par l'allocation, puis fusionné par la libération.\n");
+}
+
 void test_perf(void) {
     /* Teste les performances de la fonction myalloc lorsqu'on alloue tous les blocs */
 
@@ -123,6 +135,8 @@ void test_perf(void) {
     clock_t time1, time2;
     float diff1, diff2;
     void *ptr_tab[MAX_SMALL];
+
+    printf("----- TEST_PERF -----\n");
 
     time1 = clock();
 
@@ -163,4 +177,17 @@ void test_perf(void) {
     printf("Allocations malloc : %f ms\n", diff2);
     
     printf("Notre version est %.1f fois plus lente... \n", diff1/diff2);
+}
+
+int main(void) {
+    test_1();
+    test_2();
+    test_3();
+    test_4();
+    test_5();
+    test_ext_1();
+    test_ext_2();
+    test_perf();
+
+    return 0;
 }

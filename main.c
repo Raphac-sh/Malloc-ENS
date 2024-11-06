@@ -1,13 +1,7 @@
 #include "project.h"
 
 int main(void) {
-    test_1();
-    test_2();
-    test_3();
-    test_4();
-    test_5();
-    test_ext_1();
-    test_perf();
+    myfree(my_realloc(myalloc(5000),7000));
 
     return 0;
 }

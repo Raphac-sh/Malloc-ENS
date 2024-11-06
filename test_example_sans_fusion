@@ -7,49 +7,60 @@ test_1 : Validé, On a bien divisé le bloc libre
 ----- TEST_2 -----
 On alloue et on libère un bloc de taille 5000 :
 Bloc libre 0 : 5048
+Bloc libre 1 : 3048
+Bloc libre 2 : 2000
 On alloue un bloc de taille 4950 :
-big_free vide
+Bloc libre 0 : 3048
+Bloc libre 1 : 2000
 test_2 : Validé, On a bien réalloué le bloc précédemment libéré
 ----- TEST_3 -----
-big_free vide
+Bloc libre 0 : 3048
+Bloc libre 1 : 2000
 Première libération :
 Bloc libre 0 : 5048
+Bloc libre 1 : 3048
+Bloc libre 2 : 2000
 Deuxième libération :
 Bloc libre 0 : 5048
+Bloc libre 1 : 3048
+Bloc libre 2 : 2000
 test_3 : Validé, on ne peut pas libérer un bloc libre
 ----- TEST_4 -----
-big_free vide
+Bloc libre 0 : 3048
+Bloc libre 1 : 2000
 On réalloue un bloc de taille 5000 à une taille plus grande :
 Bloc libre 0 : 5048
+Bloc libre 1 : 3048
+Bloc libre 2 : 2000
 On libère le bloc réalloué :
 Bloc libre 0 : 7048
 Bloc libre 1 : 5048
+Bloc libre 2 : 3048
+Bloc libre 3 : 2000
 test_4 : Validé, la réallocation d'un bloc de taille fonctionne comme attendu
 ----- TEST_5 -----
 Bloc libre 0 : 2000
 Bloc libre 1 : 5048
+Bloc libre 2 : 3048
+Bloc libre 3 : 2000
 On réalloue un bloc de taille 5000 à une taille plus petite, le bloc est divisé :
 Bloc libre 0 : 2000
 Bloc libre 1 : 2000
 Bloc libre 2 : 5048
+Bloc libre 3 : 3048
+Bloc libre 4 : 2000
 Après libération :
-Bloc libre 0 : 5048
+Bloc libre 0 : 3048
 Bloc libre 1 : 2000
-Bloc libre 2 : 5048
+Bloc libre 2 : 2000
+Bloc libre 3 : 5048
+Bloc libre 4 : 3048
+Bloc libre 5 : 2000
 test_3 : Validé, on a bien divisé le bloc lors d'une réallocation à une taille inférieure 
 ----- TEST_EXT_1 -----
 test_ext_1 : validé, on augmente le nombre de petits blocs lorsque la mémoire est pleine
 
------ TEST_EXT_2 -----
-Bloc libre 0 : 5048
-Bloc libre 1 : 2000
-Bloc libre 2 : 5048
-On alloue un bloc de taille 1000, que l'on libère
-Bloc libre 0 : 5048
-Bloc libre 1 : 2000
-Bloc libre 2 : 5048
-test_ext_2 : validé, on fusionne bien les blocs adjacents : le bloc est divisé par l'allocation, puis fusionné par la libération.
 ----- TEST_PERF -----
-Allocations myalloc : 1.134000 ms
-Allocations malloc : 1.026000 ms
-Notre version est 1.1 fois plus lente... 
+Allocations myalloc : 0.927000 ms
+Allocations malloc : 0.600000 ms
+Notre version est 1.5 fois plus lente... 
